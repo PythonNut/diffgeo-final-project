@@ -95,16 +95,16 @@
 \section{Final Proposal}
 For the Math143 final project, we are proposing to cover the topic of differentiable neural computers or DNCs.
 DNCs are similar to artificial neural networks in that they excel in sequence learning. 
-However, neural nets fall short in regards to storing time series data over large time intervals due to a lack of e external memory. 
+However, neural nets fall short in regards to storing time series data over large time intervals due to a lack of external memory. 
 This limits the ability of artificial neural networks to represent complex variables and data structures. 
 On the contrary, DNCs do have the capability to read and write from an external memory.
-The ability to store inputs and outputs over longer timescales allows the DNC to operate on the data itself and learn how to model the function that has operated on the data.
+The ability to store inputs and outputs over longer timescales allows the DNC to operate on the data itself and learn what model best describes the relation between the inputs and outputs.
 The typical architecture for a DNC is comprised of three components.
 There is the controller, which is usually a recurrent neural network which performs the learning on the data.
 There is the read and write heads, which select what sections of memory to read and write from.
 Finally there is the external memory where the controller will store outputs and inputs to later retrieve.
 The controller will also assign weights to different memory locations based on what we will call attention mechanisms. 
-There attention mechanisms are based on content, memory allocation, and temporal order.
+These attention mechanisms are based on content, memory allocation, and temporal order.
 The controller will then take these attention mechanisms into account to develop weights which will tweak its learning performance.
 \\
 \indent For our research on DNCs, we will mostly be using the works produced by Alex Graves, who is a member of Google's DeepMind division.
