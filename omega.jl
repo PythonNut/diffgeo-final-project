@@ -25,10 +25,10 @@ for i in 1:size(df, 1)
 end
 
 T = (T - T[1])/1000
-sωx, sωy, sωz = Spline1D.([T], [ωx, ωy, ωz])
+ωxs, ωys, ωzs = Spline1D.([T], [ωx, ωy, ωz])
 
 function W(t)
-    x, y, z = sωx(t), sωy(t), sωz(t)
+    x, y, z = ωxs(t), ωys(t), ωzs(t)
     return @SMatrix [ 0 -z  y;
                       z  0 -x;
                      -y  x  0]
