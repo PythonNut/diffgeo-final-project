@@ -49,8 +49,8 @@ prog = Progress(n,1)
 
 anim = @animate for t in linspace(0, 100, n)
     ω = sol(t)[:, 1]
-    @printf("%f %f %f\n", ω...)
     push!(plt, ω...)
+    next!(prog)
 end every 10
 
 mp4(anim, "omega.mp4")
