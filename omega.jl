@@ -1,4 +1,3 @@
-using DataFrames
 using CSV
 using Dierckx
 using DifferentialEquations
@@ -9,11 +8,11 @@ using ProgressMeter
 pyplot()
 
 file = "100669/100669/100669_session_9/Gyroscope.csv"
-df = CSV.read(file, header=collect(1:7))
+df = readcsv(file)
 
 T, ωx, ωy, ωz = Int64[], Float64[], Float64[], Float64[]
 for i in 1:size(df, 1)
-    (t, _, _, x, y, z, _) = Array(df[i,:])
+    (t, _, _, x, y, z, _) = df[i,:]
     if length(T) > 0 && T[end] == t
         continue
     end
