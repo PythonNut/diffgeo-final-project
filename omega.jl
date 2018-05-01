@@ -1,4 +1,3 @@
-using CSV
 using Dierckx
 using DifferentialEquations
 using Plots

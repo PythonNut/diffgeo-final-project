@@ -1,5 +1,4 @@
 using DataFrames
-using CSV
 using Plots
 using ProgressMeter
 
@@ -12,7 +11,7 @@ pyplot()
 end
 
 file = "100669/100669/100669_session_9/Accelerometer.csv"
-df = CSV.read(file, header=collect(1:7))
+df = readcsv(file)
 @everywhere fs = 1000
 
 T, Xa, Ya, Za = Vector{Int64}(), Vector{Float64}(), Vector{Float64}(), Vector{Float64}()
