@@ -5,8 +5,9 @@ using PyPlot
 using PyCall
 using RecursiveArrayTools
 using ProgressMeter
-@pyimport matplotlib.animation as anim
 @pyimport mpl_toolkits
+@pyimport mpl_toolkits.mplot3d as mplot3d
+@pyimport matplotlib.animation as anim
 
 function read_file_sampled(file)
     df = CSV.read(file, header=collect(1:7))
@@ -42,7 +43,7 @@ Tacc, Vacc = read_file_sampled("public_dataset/100669/100669_session_9/Accelerom
 
 @assert Tacc == Tgyr == Tacc
 
-T = Tmag #WLOG
+global T = Tmag #WLOG
 
 @printf("Unifying gravitational and magnetic fields...\n")
 
@@ -57,13 +58,13 @@ Rs = Array(VectorOfArray(Rs))
 
 prog = Progress(1000,1)
 
-fig = figure()
-ax = fig[:add_subplot](111, projection="3d")
+fig = figure("MyFigure")
+ax = axes(projection="3d", xlim=(-1,1), ylim=(-1,1), zlim=(-1,1))
 n = 5
 
-global line = Array(Any,n)
+global line = []
 for i = 1:n
-    line[i]   = ax[:plot]([],[],[])[1]
+    push!(line, ax[:plot]([],[],[])[1])
 end
 
 function init()
@@ -72,46 +73,35 @@ function init()
         line[i][:set_data]([],[])
         line[i][:set_3d_properties]([])
     end
-    result = tuple(tuple([line[i] for i = 1:n]...)...)
-    return result
+    return tuple(line..., Union{})
 end
-
-#To speed up the animation, we will only plot every 'step'th data point
-step = 125
 
 function animate(i)
     global line
+    global Rs
+    global Vacc
+    global Vmag
+    println(i)
+    ω = Rs[:,:,i+1]
+    acc = normalize(Vacc[i+1,:])
+    mag = normalize(Vmag[i+1,:])
 
-    ω = Rs[:,:,i]
-    acc = normalize(Vacc[i,:])
-    mag = normalize(Vmag[i,:])
+    line[1][:set_data]([0, ω[1,1]], [0, ω[2,1]])
+    line[1][:set_3d_properties]([0, ω[3,1]])
 
-    line[0][:set_data](ω[0][0],ω[1][0])
-    line[0][:set_3d_properties](ω[2][0])
+    line[2][:set_data]([0, ω[1,2]], [0, ω[2,2]])
+    line[2][:set_3d_properties]([0, ω[3,2]])
 
-    line[1][:set_data](ω[0][1],ω[1][1])
-    line[1][:set_3d_properties](ω[2][1])
+    line[3][:set_data]([0, ω[1,3]], [0, ω[2,3]])
+    line[3][:set_3d_properties]([0, ω[3,3]])
 
-    line[2][:set_data](ω[0][2],ω[1][2])
-    line[2][:set_3d_properties](ω[2][2])
+    line[4][:set_data]([0, mag[1]], [0, mag[2]])
+    line[4][:set_3d_properties]([0, mag[3]])
 
-    line[3][:set_data](mag[0],mag[1])
-    line[3][:set_3d_properties](mag[2])
-
-    line[4][:set_data](acc[0],acc[1])
-    line[4][:set_3d_properties](acc[2])
+    line[5][:set_data]([0, acc[1]], [0, acc[2]])
+    line[5][:set_3d_properties]([0, acc[3]])
     
-    # result = tuple(tuple([line[i] for i = 1:n]...)...)
-    # return result
+    return tuple(line..., Union{})
 end
-myanim = anim.FuncAnimation(fig, animate, init_func=init, frames=1000, interval=20)
 
-
-
-
-
-
-
-
-
-
+myanim = anim.FuncAnimation(fig, animate, init_func=init, frames=100, interval=20)
