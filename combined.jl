@@ -54,20 +54,41 @@ end
 
 Rs = Array(VectorOfArray(Rs))
 
-prog = Progress(1000,1)
-anim = @animate for i in 1:1000
-    ω = Rs[:,:,i]
-    acc = normalize(Vacc[i,:])
-    mag = normalize(Vmag[i,:])
+@printf("Integrating gyroscope w.r.t. absolute sensors...\n")
+t = 0
+C = Rs[:,:,1]
+ts, Cs = [0.0], [C]
+for i in 2:size(T, 1)
+    (tdt, (x, y, z)) = T[i], Vgyr[i,:]
+    dt = tdt - t
+    B = [0 -z y; z 0 -x; -y x 0] * dt
+    σ = norm([x, y, z] * dt)
+    C *= eye(3) + sin(σ)/σ*B + (1 - cos(σ))/σ^2*B^2
+    C = 0.98*C + 0.02*Rs[:,:,i]
+    push!(ts, tdt)
+    push!(Cs, C)
+    t = tdt
+end
+
+Cs = Array(VectorOfArray(Cs))
+Cspline = mapslices(x->Spline1D(ts, x), Cs, 3)
+
+n = 1000
+prog = Progress(n, 1)
+anim = @animate for t in linspace(0, 10, n)
+    ω = (x->x(t)).(Cspline)
+    # ω = Cs[:,:,i]
+    # acc = normalize(Vacc[i,:])
+    # mag = normalize(Vmag[i,:])
     plot((x->[0,x]).(ω[:,1])..., color="red", label="x")
     plot!((x->[0,x]).(ω[:,2])..., color="green", label="y")
     plot!((x->[0,x]).(ω[:,3])..., color="blue", label="z")
-    plot!((x->[0,x]).(acc)..., color="teal", label="acc")
-    plot!((x->[0,x]).(mag)..., color="orange", label="mag")
-    ylims!(-1,1)
-    xlims!(-1,1)
-    zlims!(-1,1)
+    # plot!((x->[0,x]).(acc)..., color="teal", label="acc")
+    # plot!((x->[0,x]).(mag)..., color="orange", label="mag")
+    ylims!(-1, 1)
+    xlims!(-1, 1)
+    zlims!(-1, 1)
     next!(prog)
 end
 
-mp4(anim, "orientation.mp4")
+mp4(anim, "fused.mp4")
