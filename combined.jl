@@ -47,9 +47,27 @@ T = Tmag #WLOG
 
 Rs = Matrix{Float64}[]
 for (i, t) in enumerate(T)
-    gyr, acc = Vgyr[i,:], Vacc[i, :]
-    R = hcat(gyr, acc, cross(gyr, acc))
+    acc, mag = Vacc[i,:], Vmag[i, :]
+    R = hcat(acc, mag, cross(acc, mag))
     push!(Rs, orth(R))
 end
 
 Rs = Array(VectorOfArray(Rs))
+
+prog = Progress(1000,1)
+anim = @animate for i in 1:1000
+    ω = Rs[:,:,i]
+    acc = normalize(Vacc[i,:])
+    mag = normalize(Vmag[i,:])
+    plot((x->[0,x]).(ω[:,1])..., color="red", label="x")
+    plot!((x->[0,x]).(ω[:,2])..., color="green", label="y")
+    plot!((x->[0,x]).(ω[:,3])..., color="blue", label="z")
+    plot!((x->[0,x]).(acc)..., color="teal", label="acc")
+    plot!((x->[0,x]).(mag)..., color="orange", label="mag")
+    ylims!(-1,1)
+    xlims!(-1,1)
+    zlims!(-1,1)
+    next!(prog)
+end
+
+mp4(anim, "orientation.mp4")
