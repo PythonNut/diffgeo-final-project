@@ -12,7 +12,7 @@ function read_file_sampled(file)
     t = -1
     ts, vs = Int64[], Vector{Float64}[]
     for row in eachrow(df)
-        (tdt, _, _, x, y, z, _) = Array(row)
+        tdt, x, y, z = row[1], row[4], row[5], row[6]
         if t == tdt
             continue
         end
