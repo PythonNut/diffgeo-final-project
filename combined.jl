@@ -8,7 +8,7 @@ using ProgressMeter
 pyplot()
 
 function read_file_sampled(file)
-    df = CSV.read(file, header=collect(1:7))
+    df = CSV.read(file, datarow=1)
     t = -1
     ts, vs = Int64[], Vector{Float64}[]
     for row in eachrow(df)
