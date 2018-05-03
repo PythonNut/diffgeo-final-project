@@ -30,7 +30,7 @@ function read_file_sampled(file)
 end
 
 function orth(V)
-    F = svdfact(mapslices(normalize, V, 2))
+    F = svdfact(mapslices(normalize, V, 1))
     return F[:U] * F[:Vt]
 end
 
