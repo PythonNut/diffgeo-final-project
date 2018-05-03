@@ -7,6 +7,11 @@ using ProgressMeter
 
 pyplot()
 
+function fcat(mats)
+    # This is a faster cat(3, Cs...)
+    return Array(VectorOfArray(mats))
+end
+
 function read_file_sampled(file)
     df = CSV.read(file, datarow=1)
     t = -1
@@ -52,7 +57,7 @@ for (i, t) in enumerate(T)
     push!(Rs, orth(R))
 end
 
-Rs = Array(VectorOfArray(Rs))
+Rs = fcat(Rs)
 
 @printf("Integrating gyroscope w.r.t. absolute sensors...\n")
 t = 0
@@ -70,7 +75,7 @@ for i in 2:size(T, 1)
     t = tdt
 end
 
-Cs = Array(VectorOfArray(Cs))
+Cs = fcat(Cs)
 Cspline = mapslices(x->Spline1D(ts, x), Cs, 3)
 
 n = 1000
