@@ -7,17 +7,12 @@ using ProgressMeter
 
 pyplot()
 
-function fcat(mats)
-    # This is a faster cat(3, Cs...)
-    return Array(VectorOfArray(mats))
-end
-
 function read_file_sampled(file)
-    df = CSV.read(file, datarow=1)
+    df = CSV.read(file, header=collect(1:7))
     t = -1
     ts, vs = Int64[], Vector{Float64}[]
     for row in eachrow(df)
-        tdt, x, y, z = row[1], row[4], row[5], row[6]
+        (tdt, _, _, x, y, z, _) = Array(row)
         if t == tdt
             continue
         end
@@ -35,7 +30,7 @@ function read_file_sampled(file)
 end
 
 function orth(V)
-    F = svdfact(mapslices(normalize, V, 1))
+    F = svdfact(mapslices(normalize, V, 2))
     return F[:U] * F[:Vt]
 end
 
@@ -57,7 +52,7 @@ for (i, t) in enumerate(T)
     push!(Rs, orth(R))
 end
 
-Rs = fcat(Rs)
+Rs = Array(VectorOfArray(Rs))
 
 @printf("Integrating gyroscope w.r.t. absolute sensors...\n")
 t = 0
@@ -75,7 +70,7 @@ for i in 2:size(T, 1)
     t = tdt
 end
 
-Cs = fcat(Cs)
+Cs = Array(VectorOfArray(Cs))
 Cspline = mapslices(x->Spline1D(ts, x), Cs, 3)
 
 n = 1000
