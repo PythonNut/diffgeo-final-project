@@ -22,17 +22,15 @@ accel_x = []
 accel_y = []
 accel_z = []
 i = 0
+time_prev = 0
 
 for row in csvreader:
-	if i < 10:
+	if row[0] != time_prev:
 		times.append(int(row[0]))
 		accel_x.append(float(row[3]))
 		accel_y.append(float(row[4]))
-		accel_z.append(float(row[5]))
-		i = i+1
-	else:
-		i = i+1
-		continue
+		accel_z.append(float(row[5])-8)
+	time_prev = row[0]
 
 # computes the difference of the arrays
 times_diff = numpy.diff(times)

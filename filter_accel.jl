@@ -47,7 +47,7 @@ Xaf = low_pass(Tms, Xas)
 Yaf = low_pass(Tms, Yas)
 Zaf = low_pass(Tms, Zas)
 
-plot(T, Xa)
-plot!(Tms, Xas)
-plot!(Tms,Xaf)
+plot(T, Za)
+# plot!(Tms, Zas)
+plot!(Tms,Zaf)
 

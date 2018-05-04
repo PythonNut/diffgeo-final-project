@@ -55,6 +55,6 @@ N = 10000
 data = np.array(list(gen(N))).T
 #line, = ax.plot(data[0, 0:1], data[1, 0:1], data[2, 0:1])
 line, = ax.plot(accel_x, accel_y, accel_z, label='parametric curve')
-ani = animation.FuncAnimation(fig, update, N, fargs=(data, line), interval=50, blit=False)
+ani = animation.FuncAnimation(fig, update, N, fargs=(data, line), interval=40, blit=False)
 #ani.save('matplot003.gif', writer='imagemagick')
 plt.show()

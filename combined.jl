@@ -35,9 +35,9 @@ function orth(V)
 end
 
 @printf("Loading files...\n")
-Tmag, Vmag = read_file_sampled("100669/100669/100669_session_9/Magnetometer.csv")
-Tgyr, Vgyr = read_file_sampled("100669/100669/100669_session_9/Gyroscope.csv")
-Tacc, Vacc = read_file_sampled("100669/100669/100669_session_9/Accelerometer.csv")
+Tmag, Vmag = read_file_sampled("public_dataset/100669/100669_session_10/Magnetometer.csv")
+Tgyr, Vgyr = read_file_sampled("public_dataset/100669/100669_session_10/Gyroscope.csv")
+Tacc, Vacc = read_file_sampled("public_dataset/100669/100669_session_10/Accelerometer.csv")
 
 @assert Tacc == Tgyr == Tacc
 
