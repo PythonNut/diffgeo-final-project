@@ -8,56 +8,11 @@ using ProgressMeter
 using StatsBase
 using DSP
 
+include("util.jl")
+
 @pyimport mpl_toolkits
 @pyimport mpl_toolkits.mplot3d as mplot3d
 @pyimport matplotlib.animation as anim
-
-function fcat(mats)
-    # This is a faster cat(3, Cs...)
-    return Array(VectorOfArray(mats))
-end
-
-function read_file_sampled(file)
-    df = CSV.read(file, datarow=1)
-    t = -1
-    ts, vs = Int64[], Vector{Float64}[]
-    for row in eachrow(df)
-        tdt, x, y, z = row[1], row[4], row[5], row[6]
-        if t == tdt
-            continue
-        end
-        push!(ts, tdt)
-        push!(vs, [x,y,z])
-        t = tdt
-    end
-    vmat = fcat(vs)
-    ts -= ts[1]
-    return ts, vmat
-end
-
-function spline_sample(ts, vs, dt)
-    tsample = 0:dt:ts[end]
-    vspline = mapslices(cs->Spline1D(ts, cs, k=1), vs, 2)
-    vsample = (s->s(tsample)).(vspline)
-    return tsample, hcat(vsample...)
-end
-
-function orth(V)
-    F = svdfact(mapslices(normalize, V, 1))
-    return F[:U] * F[:Vt]
-end
-
-function low_pass(T, xs, fs)
-    filt = digitalfilter(Lowpass(0.3, fs=fs), FIRWindow(hanning(10001)))
-    xsf = filtfilt(filt, xs)
-    return xsf
-end
-
-function high_pass(T, xs, fs)
-    filt = digitalfilter(Highpass(0.3, fs=fs), FIRWindow(hanning(10001)))
-    xsf = filtfilt(filt, xs)
-    return xsf
-end
 
 function draw_vec(line, o, v)
     line[:set_data]([o[1], o[1] + v[1]], [o[2], o[2] + v[2]])
@@ -70,38 +25,13 @@ function make_lines(marks)
     return [ax[:plot]([],[],[], mark)[1] for mark in marks]
 end
 
-function proj(u, v)
-    return dot(u, v)/dot(u, u) * u
-end
-
-function cumtrapz(x::Array{Float64, 1}, y::Array{Float64}, dim::Integer=1)
-    perm = [dim:max(length(size(y)),dim); 1:dim-1];
-    y = permutedims(y, perm);
-    if ndims(y) == 1
-        n = 1;
-        m = length(y);
-    else
-        m, n = size(y);
-    end
-
-    if n == 1
-        dt = diff(x)/2.0;
-        z = [0; cumsum(dt.*(y[1:(m-1)] + y[2:m]))];
-    else
-        dt = repmat(diff(x)/2.0,1,n);
-        z = [zeros(1,n); cumsum(dt.*(y[1:(m-1), :] + y[2:m, :]),1)];
-        z = ipermutedims(z, perm);
-    end
-
-    return z
-end
-
 @printf("Loading files...\n")
 Tmag_raw, Vmag_raw = read_file_sampled("public_dataset/100669/100669_session_9/Magnetometer.csv")
 Tgyr_raw, Vgyr_raw = read_file_sampled("public_dataset/100669/100669_session_9/Gyroscope.csv")
 Tacc_raw, Vacc_raw = read_file_sampled("public_dataset/100669/100669_session_9/Accelerometer.csv")
 
-sample_rate_ms = mode(vcat(diff(Tmag_raw), diff(Tgyr_raw), diff(Tacc_raw)))
+# sample_rate_ms = mode(vcat(diff(Tmag_raw), diff(Tgyr_raw), diff(Tacc_raw)))
+sample_rate_ms = 10
 
 Tmag, Vmag = spline_sample(Tmag_raw/1000, Vmag_raw, sample_rate_ms/1000)
 Tgyr, Vgyr = spline_sample(Tgyr_raw/1000, Vgyr_raw, sample_rate_ms/1000)
