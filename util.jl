@@ -75,13 +75,13 @@ function spline_sample(ts, vs, dt)
 end
 
 function low_pass(T, xs, fs)
-    filt = digitalfilter(Lowpass(0.3, fs=fs), FIRWindow(hanning(10001)))
+    filt = digitalfilter(Lowpass(0.3, fs=fs), FIRWindow(hanning(1001)))
     xsf = filtfilt(filt, xs)
     return xsf
 end
 
 function high_pass(T, xs, fs)
-    filt = digitalfilter(Highpass(0.3, fs=fs), FIRWindow(hanning(10001)))
+    filt = digitalfilter(Highpass(0.3, fs=fs), FIRWindow(hanning(1001)))
     xsf = filtfilt(filt, xs)
     return xsf
 end
