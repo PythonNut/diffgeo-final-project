@@ -2,8 +2,9 @@ using DataFrames
 using CSV
 using Dierckx
 using RecursiveArrayTools
-using StatsBase
 using DSP
+using Glob
+using Rotations
 
 function fcat(mats)
     # This is a faster cat(3, Cs...)
