@@ -35,28 +35,11 @@ function read_file_sampled(file)
 end
 
 function get_sessions()
-    dataset = "public_dataset"
-    users = readdir(dataset)
-    session_list = []
+    return glob("public_dataset/*/*")
+end
 
-    # loop through all of the users
-    for i = 1:length(users)
-        user = string(dataset, "/", users[i])
-        # check that the user is a directory
-        if isdir(user)
-            sessions = readdir(user)
-            # loop through all sessions for a user
-            for child in sessions
-                session = joinpath(user, child)
-                # check that the session is a directory
-                if isdir(session)
-                    push!(session_list, session)
-                end
-            end
-        end
-    end
-
-    return session_list
+function db_key(session)
+    return replace(session, "/", "_")
 end
 
 function get_session_activity(session)
@@ -66,6 +49,22 @@ function get_session_activity(session)
     activities = unique(df[:9])
     @assert length(activities) == 1
     return activities[1] % 6
+end
+
+function filter_sessions(sessions, db)
+    keys = names(db)
+    return filter(session->db_key(session) in keys, sessions)
+end
+
+function read_session(session)
+    key = db_key(session)
+    R, x = readmmap(db[key * "/rot"]), readmmap(db[key * "/pos"])
+    activity = get_session_activity(session)
+    return R, x, activity
+end
+
+function walking(id)
+    return id in [0, 2, 4]
 end
 
 function spline_sample(ts, vs, dt)
@@ -117,3 +116,45 @@ function integrate3d(T, xs)
     Tc = collect(T)
     return mapslices(cs->cumtrapz(Tc, cs[1:length(Tc)]), xs, 1)
 end
+
+function normalize_batch(R, x)
+    R0 = inv(SPQuat(R[1,:]...))
+    Rn = zeros(R)
+    for i in 1:size(R, 1)
+        q=R0*SPQuat(R[i,:]...)
+        Rn[i,1] = q.x
+        Rn[i,2] = q.y
+        Rn[i,3] = q.z
+    end
+    xn = zeros(x)
+    for i in 1:size(xn, 1)
+        xn[i,:] = R0 * x[i,:]
+    end
+    return Rn, xn
+end
+
+batch(channel, batchsize) = Channel() do c
+    while true
+        batch = collect(Iterators.take(channel, batchsize))
+        if length(batch) == 0
+            break
+        end
+        push!(c, (getindex.(batch, 1), getindex.(batch, 2)))
+    end
+end
+
+macro ifund(exp)
+    local e = :($exp)
+    isdefined(e.args[1]) ? :($(e.args[1])) : :($(esc(exp)))
+end
+
+macro interrupts(ex)
+    :(try $(esc(ex))
+      catch e
+      e isa InterruptException || rethrow()
+      throw(e)
+      end)
+end
+
+runall(f) = f
+runall(fs::AbstractVector) = () -> foreach(call, fs)
