@@ -133,13 +133,23 @@ function normalize_batch(R, x)
     return Rn, xn
 end
 
-batch(channel, batchsize) = Channel() do c
+batch_zip(channel, batchsize) = Channel() do c
     while true
         batch = collect(Iterators.take(channel, batchsize))
         if length(batch) == 0
             break
         end
         push!(c, (getindex.(batch, 1), getindex.(batch, 2)))
+    end
+end
+
+batch(channel, batchsize) = Channel() do c
+    while true
+        batch = collect(Iterators.take(channel, batchsize))
+        if length(batch) == 0
+            break
+        end
+        push!(c, batch)
     end
 end
 
